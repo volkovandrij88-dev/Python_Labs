@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Route(models.Model):
@@ -12,6 +13,7 @@ class Route(models.Model):
 
 
 class TicketOrder(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     phone = models.CharField(max_length=20)
@@ -38,3 +40,12 @@ class Rating(models.Model):
 
     def __str__(self):
         return f"{self.route} — {self.value}"
+
+
+class PasswordResetCode(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} — {self.code}"

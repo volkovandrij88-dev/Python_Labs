@@ -1,0 +1,28 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Особистий кабінет</h2>
+
+    <p class="text-center">Користувач: <b>{{ request.user.username }}</b></p>
+
+    <h3 class="mb-3">Замовлення</h3>
+
+    {% for ticket in tickets %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h4>{{ ticket.route.from_city }} — {{ ticket.route.to_city }}</h4>
+                <p>Ім'я: {{ ticket.name }}</p>
+                <p>Телефон: {{ ticket.phone }}</p>
+                <p>Кількість квитків: {{ ticket.count }}</p>
+                <p>Сума: {{ ticket.total_price }} грн</p>
+                <p>Дата: {{ ticket.created_at }}</p>
+            </div>
+        </div>
+    {% empty %}
+        <p class="text-center">Замовлень ще немає.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}
