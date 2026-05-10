@@ -1,10 +1,52 @@
-<!DOCTYPE html>
-<html>
-<head><title>Головна</title></head>
-<body>
-    <h1>{{ zagolovok }}</h1>
-    <p>{{ text_main }}</p>
-    <hr>
-    <a href="{% url 'page_two' %}">Перейти на сторінку "Про нас"</a>
-</body>
-</html>
+{% extends 'blog/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="row">
+
+        {% for route in routes %}
+
+        <div class="col-md-4 mb-4">
+
+            <div class="card shadow-sm">
+
+                {% load static %}
+
+<img src="{% static 'blog/images/' %}{{ route.image }}"
+     class="card-img-top"
+     alt="{{ route.to_city }}"
+     style="height: 250px; object-fit: cover;">
+                <div class="card-body text-center">
+
+                    <h3>
+                        {{ route.from_city }} — {{ route.to_city }}
+                    </h3>
+
+                    <h2 class="text-success">
+                        {{ route.price }} грн
+                    </h2>
+
+                    <p>
+                        Маршрут створено: 07.05.2026
+                    </p>
+
+                    <button class="btn btn-primary w-100">
+                        Купити квиток
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}
