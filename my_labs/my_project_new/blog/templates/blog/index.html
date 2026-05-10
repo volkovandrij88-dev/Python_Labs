@@ -5,37 +5,52 @@
 
 <div class="container mt-4">
 
+    <!-- ПОШУК -->
+    <form method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text"
+                   name="search"
+                   class="form-control"
+                   placeholder="Пошук маршруту..."
+                   value="{{ search }}">
+
+            <button class="btn btn-primary" type="submit">
+                Шукати
+            </button>
+        </div>
+    </form>
+
     <div class="row">
 
         {% for route in routes %}
 
-        <div class="col-md-4 mb-4">
+        <div class="col-12 col-md-6 col-lg-4 mb-4">
 
-            <div class="card shadow-sm">
+            <div class="card shadow-sm h-100">
 
-                {% load static %}
+                <img src="{% static 'blog/images/' %}{{ route.image }}"
+                     class="card-img-top"
+                     alt="{{ route.to_city }}"
+                     style="height: 250px; object-fit: cover;">
 
-<img src="{% static 'blog/images/' %}{{ route.image }}"
-     class="card-img-top"
-     alt="{{ route.to_city }}"
-     style="height: 250px; object-fit: cover;">
                 <div class="card-body text-center">
 
                     <h3>
                         {{ route.from_city }} — {{ route.to_city }}
                     </h3>
 
-                    <h2 class="text-success">
+                    <h1 class="text-success">
                         {{ route.price }} грн
-                    </h2>
+                    </h1>
 
                     <p>
                         Маршрут створено: 07.05.2026
                     </p>
 
-                    <button class="btn btn-primary w-100">
+                    <a href="/blog/buy/{{ route.id }}/"
+                       class="btn btn-primary w-100">
                         Купити квиток
-                    </button>
+                    </a>
 
                 </div>
 
@@ -48,5 +63,32 @@
     </div>
 
 </div>
+<div class="container mt-5 mb-5">
+
+    <div class="card shadow p-4 text-center">
+
+        <h3>Підписка на розсилку</h3>
+
+        <form method="post" action="/blog/newsletter/">
+            {% csrf_token %}
+
+            <div class="input-group mt-3">
+                <input type="email"
+                       name="email"
+                       class="form-control"
+                       placeholder="Введіть email">
+
+                <button class="btn btn-primary">
+                    Підписатись
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
 
 {% endblock %}
+
+

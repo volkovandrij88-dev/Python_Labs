@@ -1,0 +1,52 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="card shadow mx-auto" style="max-width: 650px;">
+
+        <img src="{% static 'blog/images/' %}{{ route.image }}"
+             class="card-img-top"
+             style="height: 280px; object-fit: cover;">
+
+        <div class="card-body">
+
+            <h2 class="text-center">{{ route.from_city }} — {{ route.to_city }}</h2>
+            <h3 class="text-success text-center">{{ route.price }} грн</h3>
+
+            <p class="text-center">
+                Середня оцінка: <b>{{ average_rating }}</b> ⭐
+                (оцінок: {{ ratings_count }})
+            </p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <input type="text" name="name" class="form-control mb-3" placeholder="Ваше ім'я">
+
+                <input type="text" name="phone" class="form-control mb-3" placeholder="Номер телефону">
+
+                <input type="number" name="count" class="form-control mb-3" placeholder="Кількість квитків">
+
+                <select name="rating" class="form-control mb-3">
+                    <option value="">Оцініть маршрут</option>
+                    <option value="1">1 ⭐</option>
+                    <option value="2">2 ⭐⭐</option>
+                    <option value="3">3 ⭐⭐⭐</option>
+                    <option value="4">4 ⭐⭐⭐⭐</option>
+                    <option value="5">5 ⭐⭐⭐⭐⭐</option>
+                </select>
+
+                <button class="btn btn-success w-100">
+                    Підтвердити покупку
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
