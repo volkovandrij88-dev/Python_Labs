@@ -1,14 +1,20 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Route, TicketOrder, Newsletter, Rating
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.core.mail import send_mail
-from random import randint
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from django.http import HttpResponse
+
+from .models import Route, TicketOrder, Newsletter, Rating, PasswordResetCode
+
+from reportlab.pdfgen import canvas
+from io import BytesIO
+import zipfile
+import random
+
 
 def home(request):
     search = request.GET.get("search", "")
-
     routes = Route.objects.all()
 
     if search:
@@ -19,8 +25,11 @@ def home(request):
         "search": search
     })
 
-@login_required
+
 def buy_ticket(request, route_id):
+    if not request.user.is_authenticated:
+        return render(request, "blog/need_register.html")
+
     route = get_object_or_404(Route, id=route_id)
 
     ratings = Rating.objects.filter(route=route)
@@ -37,6 +46,8 @@ def buy_ticket(request, route_id):
         rating_value = request.POST.get("rating")
 
         if name and phone and count:
+            count = int(count)
+
             TicketOrder.objects.create(
                 user=request.user,
                 route=route,
@@ -45,13 +56,45 @@ def buy_ticket(request, route_id):
                 count=count
             )
 
-        if rating_value:
-            Rating.objects.create(
-                route=route,
-                value=rating_value
-            )
+            if rating_value:
+                Rating.objects.create(
+                    route=route,
+                    value=rating_value
+                )
 
-        return redirect("buy_ticket", route_id=route.id)
+            zip_buffer = BytesIO()
+
+            with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+                for i in range(count):
+                    pdf_buffer = BytesIO()
+                    ticket_number = random.randint(100000, 999999)
+
+                    p = canvas.Canvas(pdf_buffer)
+
+                    p.setFont("Helvetica-Bold", 22)
+                    p.drawString(100, 760, "TransportUA Ticket")
+
+                    p.setFont("Helvetica", 14)
+                    p.drawString(100, 710, f"Route: Kyiv - {route.to_city}")
+                    p.drawString(100, 680, f"Ticket number: {ticket_number}")
+                    p.drawString(100, 650, f"Passenger: {name}")
+                    p.drawString(100, 620, f"Phone: {phone}")
+                    p.drawString(100, 590, f"Price: {route.price} UAH")
+
+                    p.showPage()
+                    p.save()
+
+                    pdf_buffer.seek(0)
+
+                    filename = f"Kyiv-{route.to_city}-ticket-{ticket_number}.pdf"
+                    zip_file.writestr(filename, pdf_buffer.read())
+
+            zip_buffer.seek(0)
+
+            response = HttpResponse(zip_buffer, content_type="application/zip")
+            response["Content-Disposition"] = f'attachment; filename="Kyiv-{route.to_city}-tickets.zip"'
+
+            return response
 
     return render(request, "blog/buy_ticket.html", {
         "route": route,
@@ -69,12 +112,19 @@ def newsletter(request):
 
     return redirect("page_one")
 
+
+@login_required
 def my_tickets(request):
-    tickets = TicketOrder.objects.all().order_by("-created_at")
+    if request.user.is_superuser:
+        tickets = TicketOrder.objects.all().order_by("-created_at")
+    else:
+        tickets = TicketOrder.objects.filter(user=request.user).order_by("-created_at")
 
     return render(request, "blog/my_tickets.html", {
         "tickets": tickets
     })
+
+
 def register_user(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -89,7 +139,6 @@ def register_user(request):
             )
 
             login(request, user)
-
             return redirect("page_one")
 
     return render(request, "blog/register.html")
@@ -118,14 +167,12 @@ def logout_user(request):
     return redirect("page_one")
 
 
+@login_required
 def profile(request):
-
     if request.user.is_staff:
         tickets = TicketOrder.objects.all().order_by("-created_at")
     else:
-        tickets = TicketOrder.objects.filter(
-            user=request.user
-        ).order_by("-created_at")
+        tickets = TicketOrder.objects.filter(user=request.user).order_by("-created_at")
 
     return render(request, "blog/profile.html", {
         "tickets": tickets
@@ -136,7 +183,6 @@ def reset_password(request):
     message = ""
 
     if request.method == "POST":
-
         username = request.POST.get("username")
         code = request.POST.get("code")
         new_password = request.POST.get("new_password")
@@ -144,8 +190,7 @@ def reset_password(request):
         user = User.objects.filter(username=username).first()
 
         if user and not code:
-
-            generated_code = str(randint(100000, 999999))
+            generated_code = str(random.randint(100000, 999999))
 
             PasswordResetCode.objects.create(
                 user=user,
@@ -163,7 +208,6 @@ def reset_password(request):
             message = "Код відправлено на email"
 
         elif user and code and new_password:
-
             reset_code = PasswordResetCode.objects.filter(
                 user=user,
                 code=code
@@ -172,23 +216,10 @@ def reset_password(request):
             if reset_code:
                 user.set_password(new_password)
                 user.save()
-
                 message = "Пароль успішно змінено"
 
     return render(request, "blog/reset_password.html", {
         "message": message
     })
-
-    @login_required
-    def my_tickets(request):
-
-        if request.user.is_superuser:
-            tickets = TicketOrder.objects.all()
-        else:
-            tickets = TicketOrder.objects.filter(user=request.user)
-
-        return render(request, 'blog/my_tickets.html', {
-            'tickets': tickets
-        })
 
 
