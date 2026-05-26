@@ -4,36 +4,40 @@
 
 <div class="container mt-4">
 
-    <h2 class="mb-4">Мої замовлення</h2>
+    <h2 class="mb-4 text-center">Мої квитки</h2>
 
     {% for ticket in tickets %}
 
-    <div class="card mb-3 shadow-sm">
-        <div class="card-body">
-
-            <h4>
-                {{ ticket.route }}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0">
+                {{ ticket.route.from_city }} — {{ ticket.route.to_city }}
             </h4>
+        </div>
 
-            <p>
-                Ім’я: {{ ticket.name }}
-            </p>
+        <div class="card-body">
+            <p><b>Пасажир:</b> {{ ticket.name }}</p>
+            <p><b>Телефон:</b> {{ ticket.phone }}</p>
+            <p><b>Кількість квитків:</b> {{ ticket.count }}</p>
+            <p><b>Ціна за 1 квиток:</b> {{ ticket.route.price }} грн</p>
+            <p><b>Загальна сума:</b> {{ ticket.total_price }} грн</p>
+            <p><b>Дата покупки:</b> {{ ticket.created_at }}</p>
 
-            <p>
-                Телефон: {{ ticket.phone }}
-            </p>
+            <span class="badge bg-success">Оплачено</span>
+            <span class="badge bg-primary">PDF квиток</span>
 
-            <p>
-                Квитків: {{ ticket.count }}
-            </p>
-
+            <div class="mt-3">
+                <a href="/blog/buy/{{ ticket.route.id }}/" class="btn btn-outline-primary">
+                    Купити ще раз
+                </a>
+            </div>
         </div>
     </div>
 
     {% empty %}
 
-    <div class="alert alert-warning">
-        Замовлень немає
+    <div class="alert alert-warning text-center">
+        У вас ще немає куплених квитків.
     </div>
 
     {% endfor %}

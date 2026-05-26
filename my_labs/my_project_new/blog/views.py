@@ -48,6 +48,9 @@ def buy_ticket(request, route_id):
         if name and phone and count:
             count = int(count)
 
+            if count < 1 or count > 10:
+                return redirect("buy_ticket", route_id=route.id)
+
             TicketOrder.objects.create(
                 user=request.user,
                 route=route,
@@ -71,15 +74,31 @@ def buy_ticket(request, route_id):
 
                     p = canvas.Canvas(pdf_buffer)
 
-                    p.setFont("Helvetica-Bold", 22)
-                    p.drawString(100, 760, "TransportUA Ticket")
+                    p.setFont("Helvetica-Bold", 26)
+                    p.drawString(80, 770, "TransportUA")
+
+                    p.setFont("Helvetica", 12)
+                    p.drawString(80, 750, "Online bus ticket")
+
+                    p.line(80, 735, 520, 735)
+
+                    p.setFont("Helvetica-Bold", 18)
+                    p.drawString(80, 700, f"Route: {route.from_city} - {route.to_city}")
 
                     p.setFont("Helvetica", 14)
-                    p.drawString(100, 710, f"Route: Kyiv - {route.to_city}")
-                    p.drawString(100, 680, f"Ticket number: {ticket_number}")
-                    p.drawString(100, 650, f"Passenger: {name}")
-                    p.drawString(100, 620, f"Phone: {phone}")
-                    p.drawString(100, 590, f"Price: {route.price} UAH")
+                    p.drawString(80, 660, f"Ticket number: {ticket_number}")
+                    p.drawString(80, 630, f"Passenger: {name}")
+                    p.drawString(80, 600, f"Phone: {phone}")
+                    p.drawString(80, 570, f"Tickets in order: {count}")
+                    p.drawString(80, 540, f"Price: {route.price} UAH")
+
+                    p.line(80, 500, 520, 500)
+
+                    p.setFont("Helvetica-Bold", 14)
+                    p.drawString(80, 470, "Status: PAID")
+
+                    p.setFont("Helvetica", 10)
+                    p.drawString(80, 440, "Thank you for choosing TransportUA")
 
                     p.showPage()
                     p.save()

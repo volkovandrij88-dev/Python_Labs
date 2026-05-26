@@ -2,27 +2,88 @@
 
 {% block content %}
 
-<div class="container mt-5">
+<div class="container mt-4">
+
     <h2 class="text-center mb-4">Особистий кабінет</h2>
 
-    <p class="text-center">Користувач: <b>{{ request.user.username }}</b></p>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body text-center">
+            <h4>Користувач: {{ request.user.username }}</h4>
 
-    <h3 class="mb-3">Замовлення</h3>
+            {% if request.user.is_superuser %}
+                <span class="badge bg-danger">Адміністратор</span>
+            {% else %}
+                <span class="badge bg-primary">Користувач</span>
+            {% endif %}
+        </div>
+    </div>
 
-    {% for ticket in tickets %}
-        <div class="card shadow-sm mb-3">
-            <div class="card-body">
-                <h4>{{ ticket.route.from_city }} — {{ ticket.route.to_city }}</h4>
-                <p>Ім'я: {{ ticket.name }}</p>
-                <p>Телефон: {{ ticket.phone }}</p>
-                <p>Кількість квитків: {{ ticket.count }}</p>
-                <p>Сума: {{ ticket.total_price }} грн</p>
-                <p>Дата: {{ ticket.created_at }}</p>
+    <div class="row mb-4">
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h5>Замовлень</h5>
+                    <h2>{{ tickets.count }}</h2>
+                </div>
             </div>
         </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h5>Статус</h5>
+                    {% if request.user.is_superuser %}
+                        <h4>Адмін</h4>
+                    {% else %}
+                        <h4>Клієнт</h4>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h5>Система</h5>
+                    <h4>TransportUA</h4>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <h3 class="mb-3">Історія замовлень</h3>
+
+    {% for ticket in tickets %}
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0">
+                {{ ticket.route.from_city }} — {{ ticket.route.to_city }}
+            </h4>
+        </div>
+
+        <div class="card-body">
+            <p><b>Ім'я:</b> {{ ticket.name }}</p>
+            <p><b>Телефон:</b> {{ ticket.phone }}</p>
+            <p><b>Кількість квитків:</b> {{ ticket.count }}</p>
+            <p><b>Ціна за 1 квиток:</b> {{ ticket.route.price }} грн</p>
+            <p><b>Сума:</b> {{ ticket.total_price }} грн</p>
+            <p><b>Дата:</b> {{ ticket.created_at }}</p>
+
+            <span class="badge bg-success">Оплачено</span>
+        </div>
+    </div>
+
     {% empty %}
-        <p class="text-center">Замовлень ще немає.</p>
+
+    <div class="alert alert-warning text-center">
+        Замовлень ще немає.
+    </div>
+
     {% endfor %}
+
 </div>
 
 {% endblock %}
